@@ -1,0 +1,214 @@
+<section class="access-control" id="control-acceso" aria-labelledby="access-title">
+  <div class="access-head">
+    <div>
+      <p class="access-eyebrow"><i></i> Módulo de acreditación</p>
+      <h2 id="access-title">Validación de<br /><em>asistencia.</em></h2>
+    </div>
+    <div class="access-intro">
+      <span class="staff-badge">Uso exclusivo del personal</span>
+      <p>
+        Escanea la acreditación al ingreso. El primer escaneo registra la asistencia; los siguientes
+        son rechazados y muestran la hora de validación original.
+      </p>
+    </div>
+  </div>
+
+  <div class="access-grid">
+    <aside class="access-brief">
+      <div class="brief-top">
+        <small>Control de acceso</small>
+        <span>22 · AGO · 2026</span>
+      </div>
+      <h3>Una acreditación.<br />Un solo ingreso.</h3>
+      <ol>
+        <li>
+          <span>01</span>
+          <p>Ingresa la clave asignada al equipo.</p>
+        </li>
+        <li>
+          <span>02</span>
+          <p>Activa la cámara y apunta al código QR.</p>
+        </li>
+        <li>
+          <span>03</span>
+          <p>Confirma el resultado antes de dar acceso.</p>
+        </li>
+      </ol>
+      <div class="status-legend">
+        <p>
+          <i class="valid"></i><span><strong>Verde</strong> · Ingreso registrado</span>
+        </p>
+        <p>
+          <i class="used"></i><span><strong>Ámbar</strong> · QR ya utilizado</span>
+        </p>
+        <p>
+          <i class="invalid"></i><span><strong>Rojo</strong> · Código no válido</span>
+        </p>
+      </div>
+    </aside>
+
+    <div class="scanner-panel">
+      <div class="operator-auth">
+        <label for="operatorToken">
+          <span>Clave de operador</span>
+          <input
+            id="operatorToken"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Ingresa la clave asignada"
+            [value]="operatorToken()"
+            (input)="updateOperatorToken($event)"
+          />
+        </label>
+        <label class="remember-token">
+          <input
+            type="checkbox"
+            [checked]="rememberToken()"
+            (change)="toggleRememberToken($event)"
+          />
+          <span>Mantener durante esta pestaña</span>
+        </label>
+      </div>
+
+      <div class="reader-shell" [class.active]="cameraActive()">
+        <video
+          #scannerVideo
+          playsinline
+          muted
+          aria-label="Vista de la cámara para escanear QR"
+        ></video>
+        @if (!cameraActive() && !startingCamera()) {
+          <div class="reader-placeholder">
+            <span class="qr-symbol" aria-hidden="true">⌗</span>
+            <strong>Cámara en espera</strong>
+            <p>Actívala para comenzar a escanear.</p>
+          </div>
+        }
+        @if (startingCamera()) {
+          <div class="reader-placeholder">
+            <span class="loader" aria-hidden="true"></span>
+            <strong>Iniciando cámara…</strong>
+            <p>Acepta el permiso cuando el navegador lo solicite.</p>
+          </div>
+        }
+        @if (cameraActive()) {
+          <div class="scan-guide" aria-hidden="true"><i></i></div>
+          <span class="live-badge"><i></i> Cámara activa</span>
+        }
+      </div>
+
+      <div class="camera-actions">
+        @if (!cameraActive()) {
+          <button
+            class="camera-primary"
+            type="button"
+            (click)="startCamera()"
+            [disabled]="startingCamera() || processing()"
+          >
+            <span>{{ startingCamera() ? 'Iniciando…' : 'Activar cámara' }}</span>
+            <span aria-hidden="true">◎</span>
+          </button>
+        } @else {
+          <button class="camera-secondary" type="button" (click)="stopCamera()">
+            <span>Detener cámara</span><span aria-hidden="true">■</span>
+          </button>
+        }
+      </div>
+
+      @if (cameraMessage()) {
+        <p class="scanner-message" role="alert">{{ cameraMessage() }}</p>
+      }
+
+      <div class="manual-divider"><span>o ingresa el código manualmente</span></div>
+
+      <form class="manual-form" (submit)="validateManual($event)">
+        <label for="manualCode">Código de acreditación</label>
+        <div>
+          <input
+            id="manualCode"
+            inputmode="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="AN26-XXXX-XXXX"
+            [value]="manualCode()"
+            (input)="updateManualCode($event)"
+          />
+          <button type="submit" [disabled]="processing() || !manualCode().trim()">
+            {{ processing() ? 'Validando…' : 'Validar' }}
+          </button>
+        </div>
+      </form>
+
+      @if (processing()) {
+        <div class="processing" role="status">
+          <span class="loader dark" aria-hidden="true"></span>
+          <p>
+            <strong>Validando acreditación…</strong
+            ><small>Espera la confirmación del servidor.</small>
+          </p>
+        </div>
+      }
+
+      @if (feedback()) {
+        @let result = feedback()!;
+        <article
+          class="scan-feedback"
+          [class.success]="result.kind === 'success'"
+          [class.already]="result.kind === 'already'"
+          [class.invalid]="result.kind === 'invalid'"
+          [class.error]="result.kind === 'error' || result.kind === 'unauthorized'"
+          aria-live="assertive"
+        >
+          <div class="feedback-icon" aria-hidden="true">
+            {{ result.kind === 'success' ? '✓' : result.kind === 'already' ? '!' : '×' }}
+          </div>
+          <div class="feedback-copy">
+            <span>{{
+              result.kind === 'success'
+                ? 'Acceso autorizado'
+                : result.kind === 'already'
+                  ? 'Revisar ingreso'
+                  : 'Acceso no validado'
+            }}</span>
+            <h3>{{ result.title }}</h3>
+            <p>{{ result.message }}</p>
+            @if (result.fullName) {
+              <dl>
+                <div>
+                  <dt>Participante</dt>
+                  <dd>{{ result.fullName }}</dd>
+                </div>
+                @if (result.code) {
+                  <div>
+                    <dt>Código</dt>
+                    <dd>{{ result.code }}</dd>
+                  </div>
+                }
+                @if (result.checkedInAt) {
+                  <div>
+                    <dt>Hora de validación</dt>
+                    <dd>{{ formatCheckedInAt(result.checkedInAt) }}</dd>
+                  </div>
+                }
+              </dl>
+            } @else if (result.code) {
+              <strong class="feedback-code">{{ result.code }}</strong>
+            }
+          </div>
+          <button type="button" (click)="scanNext()">
+            {{
+              result.kind === 'success' || result.kind === 'already'
+                ? 'Escanear siguiente'
+                : 'Intentar nuevamente'
+            }}
+            <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+      }
+
+      <p class="scanner-privacy">
+        El resultado muestra únicamente nombre, código y hora de acreditación.
+      </p>
+    </div>
+  </div>
+</section>

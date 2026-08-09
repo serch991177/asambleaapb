@@ -1,13 +1,20 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import QRCode from 'qrcode';
 import { QrScannerComponent } from './scanner/qr-scanner.component';
 import { API_BASE_URL } from './api.config';
+
 type RegistrationResponse = {
   code?: string;
   error?: string;
+};
+
+type ApiErrorResponse = {
+  error?: string;
+  message?: string;
+  errors?: Record<string, string[]>;
 };
 
 type Ticket = {
@@ -23,6 +30,11 @@ type Ticket = {
   styleUrl: './app.css',
 })
 export class App {
+  @ViewChild('photoInput') private photoInput?: ElementRef<HTMLInputElement>;
+
+  private static readonly allowedPhotoTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+  private static readonly maxPhotoBytes = 5 * 1024 * 1024;
+
   private readonly formBuilder = inject(FormBuilder);
   private readonly http = inject(HttpClient);
 
@@ -30,6 +42,9 @@ export class App {
   readonly submitting = signal(false);
   readonly error = signal('');
   readonly ticket = signal<Ticket | null>(null);
+  readonly photoFile = signal<File | null>(null);
+  readonly photoPreview = signal('');
+  readonly photoError = signal('');
 
   readonly registrationForm = this.formBuilder.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(120)]],
@@ -42,9 +57,14 @@ export class App {
 
   async register(): Promise<void> {
     this.error.set('');
+    this.photoError.set('');
     this.registrationForm.markAllAsTouched();
 
-    if (this.registrationForm.invalid) {
+    const photo = this.photoFile();
+    if (this.registrationForm.invalid || !photo) {
+      if (!photo) {
+        this.photoError.set('Selecciona o toma una fotografía para continuar.');
+      }
       this.error.set('Revisa los campos marcados antes de continuar.');
       return;
     }
@@ -58,15 +78,17 @@ export class App {
 
     this.submitting.set(true);
     try {
+      const payload = new FormData();
+      payload.append('full_name', fullName);
+      payload.append('email', value.email.trim().toLowerCase());
+      payload.append('phone', value.phone.trim());
+      payload.append('identity_number', value.identityNumber.trim());
+      payload.append('birth_date', value.birthDate);
+      payload.append('consent', value.consent ? '1' : '0');
+      payload.append('photo', photo, photo.name);
+
       const result = await firstValueFrom(
-        this.http.post<RegistrationResponse>(`${API_BASE_URL}/api/register`, {
-          full_name: fullName,
-          email: value.email.trim().toLowerCase(),
-          phone: value.phone.trim(),
-          identity_number: value.identityNumber.trim(),
-          birth_date: value.birthDate,
-          consent: value.consent,
-        }),
+        this.http.post<RegistrationResponse>(`${API_BASE_URL}/api/register`, payload),
       );
 
       if (!result.code) {
@@ -91,6 +113,7 @@ export class App {
         qr,
         fullName,
       });
+      this.clearPhoto();
       window.setTimeout(
         () => document.getElementById('acreditacion')?.scrollIntoView({ behavior: 'smooth' }),
         80,
@@ -98,9 +121,13 @@ export class App {
     } catch (caught) {
       const responseBody =
         typeof caught === 'object' && caught !== null && 'error' in caught
-          ? (caught.error as { error?: string; message?: string } | null)
+          ? (caught.error as ApiErrorResponse | null)
           : null;
-      const serverMessage = responseBody?.error || responseBody?.message || null;
+      const validationMessage = responseBody?.errors
+        ? Object.values(responseBody.errors).flat()[0]
+        : null;
+      const serverMessage =
+        responseBody?.error || validationMessage || responseBody?.message || null;
       this.error.set(
         serverMessage ||
           (caught instanceof Error
@@ -112,9 +139,63 @@ export class App {
     }
   }
 
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    this.photoFile.set(null);
+    this.photoPreview.set('');
+    this.photoError.set('');
+
+    if (!file) {
+      return;
+    }
+
+    if (!App.allowedPhotoTypes.has(file.type)) {
+      this.photoError.set('La fotografía debe estar en formato JPG, PNG o WEBP.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > App.maxPhotoBytes) {
+      this.photoError.set('La fotografía no puede superar los 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.photoFile.set(file);
+      this.photoPreview.set(typeof reader.result === 'string' ? reader.result : '');
+    };
+    reader.onerror = () => {
+      this.photoError.set('No se pudo leer la fotografía seleccionada.');
+      input.value = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearPhoto(): void {
+    this.photoFile.set(null);
+    this.photoPreview.set('');
+    this.photoError.set('');
+
+    if (this.photoInput) {
+      this.photoInput.nativeElement.value = '';
+    }
+  }
+
+  photoSizeLabel(): string {
+    const bytes = this.photoFile()?.size ?? 0;
+    return bytes < 1024 * 1024
+      ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+      : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   resetRegistration(): void {
     this.ticket.set(null);
     this.error.set('');
+    this.clearPhoto();
     this.registrationForm.reset({
       fullName: '',
       email: '',

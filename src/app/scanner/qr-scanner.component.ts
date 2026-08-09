@@ -233,7 +233,7 @@ export class QrScannerComponent implements OnDestroy {
     try {
       const response = await firstValueFrom(
         this.http.post<CheckInResponse>(
-          `${API_BASE_URL}/api/register`,
+          `${API_BASE_URL}/api/check-in`,
           { code: parsed.code },
           { headers: new HttpHeaders({ 'X-Scanner-Token': token }) },
         ),

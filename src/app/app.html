@@ -19,8 +19,8 @@
       <p class="eyebrow"><i></i> Convocatoria nacional · 2026</p>
       <h1>La democracia<br /><em>se construye</em><br />participando.</h1>
       <p class="hero-lead">
-        Un encuentro para deliberar, decidir y fortalecer juntos el futuro de
-        nuestro instrumento político.
+        Un encuentro para deliberar, decidir y fortalecer juntos el futuro de nuestro instrumento
+        político.
       </p>
       <div class="hero-actions">
         <a class="primary-button" href="#registro">
@@ -32,7 +32,9 @@
 
     <div class="event-poster" aria-label="Asamblea Nacional, 22 de agosto">
       <div class="poster-top"><span>Encuentro nacional</span><span>APB Súmate · 2026</span></div>
-      <div class="poster-date"><strong>22</strong><span>AGO<br />STO</span></div>
+      <div class="poster-date">
+        <strong>22</strong><span>AGO<br />STO</span>
+      </div>
       <div class="poster-title"><span>Asamblea</span><em>Nacional</em></div>
       <div class="poster-bottom">
         <span>Deliberar</span><i></i><span>Decidir</span><i></i><span>Fortalecer</span>
@@ -48,29 +50,33 @@
   </aside>
 
   <section class="section convocation" id="convocatoria">
-    <div class="section-label"><span>01</span><p>La convocatoria</p></div>
+    <div class="section-label">
+      <span>01</span>
+      <p>La convocatoria</p>
+    </div>
     <div>
       <p class="statement">
-        La Asamblea Nacional es el máximo espacio de deliberación y decisión
-        política del partido.
+        La Asamblea Nacional es el máximo espacio de deliberación y decisión política del partido.
       </p>
       <div class="copy-columns">
         <p>
-          Este encuentro constituye un hito fundamental para fortalecer nuestra
-          institucionalidad, profundizar la democracia interna y consolidar un
-          instrumento político más sólido, participativo y representativo.
+          Este encuentro constituye un hito fundamental para fortalecer nuestra institucionalidad,
+          profundizar la democracia interna y consolidar un instrumento político más sólido,
+          participativo y representativo.
         </p>
         <p>
-          La participación está reservada exclusivamente a militantes debidamente
-          inscritos. Si aún no formalizaste tu militancia, comunícate con tu Jefe
-          Departamental antes del evento.
+          La participación está reservada exclusivamente a militantes debidamente inscritos. Si aún
+          no formalizaste tu militancia, comunícate con tu Jefe Departamental antes del evento.
         </p>
       </div>
     </div>
   </section>
 
   <section class="section process" aria-labelledby="process-title">
-    <div class="section-label"><span>02</span><p id="process-title">Cómo participar</p></div>
+    <div class="section-label">
+      <span>02</span>
+      <p id="process-title">Cómo participar</p>
+    </div>
     <div class="steps">
       <article>
         <span>01</span>
@@ -98,8 +104,8 @@
       </div>
       <div class="registration-note">
         <p>
-          Completa todos los campos. Al finalizar recibirás un código QR personal
-          para tu acreditación.
+          Completa todos los campos. Al finalizar recibirás un código QR personal para tu
+          acreditación.
         </p>
         <span>Tiempo estimado: 2 minutos · QR personal</span>
       </div>
@@ -110,6 +116,7 @@
         <p class="requirements-title">Antes de comenzar</p>
         <ul>
           <li><span>✓</span> Ten a mano tu cédula de identidad.</li>
+          <li><span>✓</span> Prepara una fotografía personal reciente.</li>
           <li><span>✓</span> Utiliza un correo y celular vigentes.</li>
           <li><span>✓</span> Verifica que tus datos estén correctos.</li>
         </ul>
@@ -118,8 +125,8 @@
           <div>
             <strong>¿Aún no eres militante?</strong>
             <p>
-              Comunícate con tu Jefe Departamental para formalizar tu inscripción
-              antes del registro.
+              Comunícate con tu Jefe Departamental para formalizar tu inscripción antes del
+              registro.
             </p>
           </div>
         </div>
@@ -131,10 +138,14 @@
           [formGroup]="registrationForm"
           (ngSubmit)="register()"
           [attr.aria-busy]="submitting()"
+          enctype="multipart/form-data"
           novalidate
         >
           <div class="form-title">
-            <div><span>Paso único</span><h3>Datos de la o el participante</h3></div>
+            <div>
+              <span>Paso único</span>
+              <h3>Datos de la o el participante</h3>
+            </div>
             <small>● Conexión segura</small>
           </div>
 
@@ -145,7 +156,10 @@
               formControlName="fullName"
               autocomplete="name"
               placeholder="Nombres y apellidos"
-              [class.invalid]="registrationForm.controls.fullName.invalid && registrationForm.controls.fullName.touched"
+              [class.invalid]="
+                registrationForm.controls.fullName.invalid &&
+                registrationForm.controls.fullName.touched
+              "
             />
           </div>
 
@@ -158,7 +172,9 @@
                 formControlName="email"
                 autocomplete="email"
                 placeholder="nombre@correo.com"
-                [class.invalid]="registrationForm.controls.email.invalid && registrationForm.controls.email.touched"
+                [class.invalid]="
+                  registrationForm.controls.email.invalid && registrationForm.controls.email.touched
+                "
               />
             </div>
             <div class="field">
@@ -170,7 +186,9 @@
                 formControlName="phone"
                 autocomplete="tel"
                 placeholder="Ej. 71234567"
-                [class.invalid]="registrationForm.controls.phone.invalid && registrationForm.controls.phone.touched"
+                [class.invalid]="
+                  registrationForm.controls.phone.invalid && registrationForm.controls.phone.touched
+                "
               />
             </div>
             <div class="field">
@@ -180,7 +198,10 @@
                 formControlName="identityNumber"
                 autocomplete="off"
                 placeholder="Número de documento"
-                [class.invalid]="registrationForm.controls.identityNumber.invalid && registrationForm.controls.identityNumber.touched"
+                [class.invalid]="
+                  registrationForm.controls.identityNumber.invalid &&
+                  registrationForm.controls.identityNumber.touched
+                "
               />
             </div>
             <div class="field">
@@ -191,15 +212,62 @@
                 formControlName="birthDate"
                 autocomplete="bday"
                 [max]="maxBirthDate"
-                [class.invalid]="registrationForm.controls.birthDate.invalid && registrationForm.controls.birthDate.touched"
+                [class.invalid]="
+                  registrationForm.controls.birthDate.invalid &&
+                  registrationForm.controls.birthDate.touched
+                "
               />
             </div>
+          </div>
+
+          <div class="photo-field" [class.invalid]="photoError()">
+            <div class="photo-field-head">
+              <div>
+                <label for="photo">Fotografía personal</label>
+                <p>Foto reciente, de frente y con buena iluminación.</p>
+              </div>
+              <small>JPG, PNG o WEBP · Máximo 5 MB</small>
+            </div>
+
+            @if (!photoPreview()) {
+              <label class="photo-picker" for="photo">
+                <span class="photo-picker-icon" aria-hidden="true">＋</span>
+                <strong>Tomar o seleccionar fotografía</strong>
+                <span>En celular puedes utilizar la cámara.</span>
+              </label>
+            } @else {
+              <div class="photo-preview">
+                <img [src]="photoPreview()" alt="Vista previa de la fotografía personal" />
+                <div>
+                  <strong>{{ photoFile()?.name }}</strong>
+                  <span>{{ photoSizeLabel() }}</span>
+                  <button type="button" (click)="clearPhoto()">Cambiar fotografía</button>
+                </div>
+              </div>
+            }
+
+            <input
+              #photoInput
+              class="photo-input"
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="user"
+              [attr.aria-invalid]="photoError() ? 'true' : 'false'"
+              [attr.aria-describedby]="photoError() ? 'photoError' : null"
+              (change)="onPhotoSelected($event)"
+            />
+
+            @if (photoError()) {
+              <p class="photo-error" id="photoError" role="alert">{{ photoError() }}</p>
+            }
           </div>
 
           <label class="consent">
             <input type="checkbox" formControlName="consent" />
             <span>
-              Declaro que los datos proporcionados son correctos y autorizo su uso
+              Declaro que los datos y la fotografía proporcionados son correctos y autorizo su uso
               exclusivo para la acreditación de esta Asamblea.
             </span>
           </label>
@@ -213,7 +281,8 @@
             <span aria-hidden="true">↗</span>
           </button>
           <p class="privacy">
-            Tus datos se utilizarán únicamente para gestionar tu registro y acreditación.
+            Tus datos y fotografía se utilizarán únicamente para gestionar tu registro y
+            acreditación.
           </p>
         </form>
       } @else {
@@ -224,16 +293,23 @@
           <h3>Tu acreditación está lista.</h3>
           <p class="ticket-name">{{ currentTicket.fullName }}</p>
           <div class="qr-frame">
-            <img [src]="currentTicket.qr" [alt]="'Código QR de acreditación ' + currentTicket.code" />
+            <img
+              [src]="currentTicket.qr"
+              [alt]="'Código QR de acreditación ' + currentTicket.code"
+            />
           </div>
           <small>Código de registro</small>
           <strong class="ticket-code">{{ currentTicket.code }}</strong>
           <p class="ticket-help">
-            Guarda este código QR y preséntalo en el punto de acreditación. No lo
-            compartas: es personal y único.
+            Guarda este código QR y preséntalo en el punto de acreditación. No lo compartas: es
+            personal y único.
           </p>
           <div class="ticket-actions">
-            <a [href]="currentTicket.qr" [attr.download]="'acreditacion-' + currentTicket.code + '.png'">Descargar QR ↓</a>
+            <a
+              [href]="currentTicket.qr"
+              [attr.download]="'acreditacion-' + currentTicket.code + '.png'"
+              >Descargar QR ↓</a
+            >
             <button type="button" (click)="printTicket()">Imprimir</button>
           </div>
           <button class="new-registration" type="button" (click)="resetRegistration()">
@@ -249,7 +325,10 @@
   <footer>
     <div class="footer-brand">
       <img class="footer-logo" src="apb-sumate-logo.png" alt="APB Súmate" />
-      <div><strong>Asamblea Nacional</strong><p>Participación que fortalece.</p></div>
+      <div>
+        <strong>Asamblea Nacional</strong>
+        <p>Participación que fortalece.</p>
+      </div>
     </div>
     <p>22 de agosto de 2026 · Bolivia</p>
     <a href="#inicio">Volver arriba ↑</a>

@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import QRCode from 'qrcode';
 import { QrScannerComponent } from './scanner/qr-scanner.component';
-
+import { API_BASE_URL } from './api.config';
 type RegistrationResponse = {
   code?: string;
   error?: string;
@@ -59,7 +59,7 @@ export class App {
     this.submitting.set(true);
     try {
       const result = await firstValueFrom(
-        this.http.post<RegistrationResponse>('/api/register', {
+        this.http.post<RegistrationResponse>(`${API_BASE_URL}/api/register`, {
           full_name: fullName,
           email: value.email.trim().toLowerCase(),
           phone: value.phone.trim(),

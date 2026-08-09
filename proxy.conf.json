@@ -1,7 +1,7 @@
 {
   "/api": {
-    "target": "http://127.0.0.1:8000",
-    "secure": false,
+    "target": "https://asambleaapbsumate.cochabamba.bo/",
+    "secure": true,
     "changeOrigin": true
   }
 }

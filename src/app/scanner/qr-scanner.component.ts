@@ -2,8 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
-import { API_BASE_URL } from './api.config';
-
+import { API_BASE_URL } from '../api.config';
 type FeedbackKind = 'success' | 'already' | 'invalid' | 'unauthorized' | 'error';
 
 type CheckInResponse = {

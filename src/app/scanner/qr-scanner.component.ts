@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
+import { API_BASE_URL } from './api.config';
 
 type FeedbackKind = 'success' | 'already' | 'invalid' | 'unauthorized' | 'error';
 
@@ -233,7 +234,7 @@ export class QrScannerComponent implements OnDestroy {
     try {
       const response = await firstValueFrom(
         this.http.post<CheckInResponse>(
-          '/api/check-in',
+          `${API_BASE_URL}/api/register`,
           { code: parsed.code },
           { headers: new HttpHeaders({ 'X-Scanner-Token': token }) },
         ),

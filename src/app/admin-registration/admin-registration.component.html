@@ -1,0 +1,347 @@
+<main class="admin-shell">
+  <header class="admin-header">
+    <a class="admin-brand" href="/" aria-label="Volver a la convocatoria">
+      <img src="apb-sumate-logo.png" alt="APB Súmate" />
+      <span><strong>Asamblea Nacional</strong><small>Registro administrativo</small></span>
+    </a>
+    <div class="admin-header-actions">
+      <a href="/">Ver convocatoria</a>
+      @if (admin()) {
+        <button type="button" (click)="logout()">Cerrar sesión</button>
+      }
+    </div>
+  </header>
+
+  @if (restoringSession()) {
+    <section class="session-loading" aria-live="polite">
+      <span></span>
+      <p>Validando sesión administrativa…</p>
+    </section>
+  } @else if (!admin()) {
+    <section class="login-layout">
+      <div class="login-intro">
+        <p class="admin-eyebrow"><i></i> Acceso restringido</p>
+        <h1>Registro por<br /><em>responsables.</em></h1>
+        <p>
+          Ingresa con la cuenta asignada a tu departamento. Cada registro válido descontará un
+          espacio de tu cupo personal.
+        </p>
+        <ul>
+          <li><span>01</span>Usuario y contraseña individual</li>
+          <li><span>02</span>Cupo controlado</li>
+          <li><span>03</span>QR único al completar el registro</li>
+        </ul>
+      </div>
+
+      <form class="login-card" [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+        <span class="login-lock" aria-hidden="true">●</span>
+        <p>Panel administrativo</p>
+        <h2>Iniciar sesión</h2>
+
+        <label for="adminUsername">
+          <span>Usuario</span>
+          <input
+            id="adminUsername"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="Ej. pepito"
+            [class.invalid]="
+              loginForm.controls.username.invalid && loginForm.controls.username.touched
+            "
+          />
+        </label>
+
+        <label for="adminPassword">
+          <span>Contraseña</span>
+          <input
+            id="adminPassword"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Tu contraseña"
+            [class.invalid]="
+              loginForm.controls.password.invalid && loginForm.controls.password.touched
+            "
+          />
+        </label>
+
+        @if (loginError()) {
+          <p class="login-error" role="alert">{{ loginError() }}</p>
+        }
+
+        <button class="login-submit" type="submit" [disabled]="loggingIn()">
+          <span>{{ loggingIn() ? 'Ingresando…' : 'Ingresar al módulo' }}</span>
+          <span aria-hidden="true">↗</span>
+        </button>
+        <small>La sesión se conserva únicamente durante esta pestaña.</small>
+      </form>
+    </section>
+  } @else {
+    @let currentAdmin = admin()!;
+    <section class="admin-dashboard">
+      <div class="dashboard-heading">
+        <div>
+          <p class="admin-eyebrow light"><i></i> Sesión activa</p>
+          <h1>Hola, {{ currentAdmin.name }}.</h1>
+          <p>
+            Registra participantes asignados a <strong>{{ currentAdmin.department }}</strong
+            >.
+          </p>
+        </div>
+        <div class="department-badge">
+          <small>Departamento</small>
+          <strong>{{ currentAdmin.department }}</strong>
+          <span>&#64;{{ currentAdmin.username }}</span>
+        </div>
+      </div>
+
+      <article class="quota-card" [class.exhausted]="currentAdmin.quota_exhausted">
+        <div class="quota-copy">
+          <span>Cupo personal</span>
+          <strong>{{ currentAdmin.quota_remaining }}</strong>
+          <small>registros disponibles</small>
+        </div>
+        <div class="quota-progress">
+          <div>
+            <span>{{ currentAdmin.quota_used }} utilizados</span>
+            <span>{{ currentAdmin.quota_limit }} asignados</span>
+          </div>
+          <p><i [style.width.%]="quotaPercentage()"></i></p>
+          <small>
+            {{
+              currentAdmin.quota_exhausted
+                ? 'Cupo agotado'
+                : 'El cupo se actualiza después de cada registro'
+            }}
+          </small>
+        </div>
+      </article>
+
+      @if (currentAdmin.quota_exhausted && !ticket()) {
+        <article class="quota-blocked" role="status">
+          <span aria-hidden="true">!</span>
+          <div>
+            <p>Cupo completado</p>
+            <h2>Ya registraste las {{ currentAdmin.quota_limit }} personas asignadas.</h2>
+            <p>
+              El formulario fue bloqueado automáticamente. Si necesitas ampliar el cupo, comunícate
+              con el responsable del sistema.
+            </p>
+          </div>
+        </article>
+      } @else if (!ticket()) {
+        <section class="admin-registration" id="admin-registration-form">
+          <aside class="registration-guide">
+            <p>Nuevo participante</p>
+            <h2>Verifica antes<br />de guardar.</h2>
+            <ul>
+              <li><span>✓</span> Cédula de identidad correcta.</li>
+              <li><span>✓</span> Fotografía reciente y visible.</li>
+              <li><span>✓</span> Correo y celular vigentes.</li>
+              <li><span>✓</span> Autorización confirmada.</li>
+            </ul>
+            <div>
+              <small>Responsable del registro</small>
+              <strong>{{ currentAdmin.name }}</strong>
+              <span>{{ currentAdmin.department }}</span>
+            </div>
+          </aside>
+
+          <form
+            class="form-card"
+            [formGroup]="registrationForm"
+            (ngSubmit)="register()"
+            [attr.aria-busy]="submitting()"
+            enctype="multipart/form-data"
+            novalidate
+          >
+            <div class="form-title">
+              <div>
+                <span
+                  >Registro {{ currentAdmin.quota_used + 1 }} de
+                  {{ currentAdmin.quota_limit }}</span
+                >
+                <h3>Datos de la o el participante</h3>
+              </div>
+              <small>● Sesión protegida</small>
+            </div>
+
+            <div class="field full">
+              <label for="fullName">Nombre completo</label>
+              <input
+                id="fullName"
+                formControlName="fullName"
+                autocomplete="name"
+                placeholder="Nombres y apellidos"
+                [class.invalid]="
+                  registrationForm.controls.fullName.invalid &&
+                  registrationForm.controls.fullName.touched
+                "
+              />
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="email">Correo electrónico</label>
+                <input
+                  id="email"
+                  type="email"
+                  formControlName="email"
+                  autocomplete="email"
+                  placeholder="nombre@correo.com"
+                  [class.invalid]="
+                    registrationForm.controls.email.invalid &&
+                    registrationForm.controls.email.touched
+                  "
+                />
+              </div>
+              <div class="field">
+                <label for="phone">Número de celular</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  inputmode="tel"
+                  formControlName="phone"
+                  autocomplete="tel"
+                  placeholder="Ej. 71234567"
+                  [class.invalid]="
+                    registrationForm.controls.phone.invalid &&
+                    registrationForm.controls.phone.touched
+                  "
+                />
+              </div>
+              <div class="field">
+                <label for="identityNumber">Cédula de identidad</label>
+                <input
+                  id="identityNumber"
+                  formControlName="identityNumber"
+                  autocomplete="off"
+                  placeholder="Número de documento"
+                  [class.invalid]="
+                    registrationForm.controls.identityNumber.invalid &&
+                    registrationForm.controls.identityNumber.touched
+                  "
+                />
+              </div>
+              <div class="field">
+                <label for="birthDate">Fecha de nacimiento</label>
+                <input
+                  id="birthDate"
+                  type="date"
+                  formControlName="birthDate"
+                  autocomplete="bday"
+                  [max]="maxBirthDate"
+                  [class.invalid]="
+                    registrationForm.controls.birthDate.invalid &&
+                    registrationForm.controls.birthDate.touched
+                  "
+                />
+              </div>
+            </div>
+
+            <div class="photo-field" [class.invalid]="photoError()">
+              <div class="photo-field-head">
+                <div>
+                  <label for="photo">Fotografía personal</label>
+                  <p>Foto reciente, de frente y con buena iluminación.</p>
+                </div>
+                <small>JPG, PNG o WEBP · Máximo 5 MB</small>
+              </div>
+
+              @if (!photoPreview()) {
+                <label class="photo-picker" for="photo">
+                  <span class="photo-picker-icon" aria-hidden="true">＋</span>
+                  <strong>Tomar o seleccionar fotografía</strong>
+                  <span>En celular puedes utilizar la cámara.</span>
+                </label>
+              } @else {
+                <div class="photo-preview">
+                  <img [src]="photoPreview()" alt="Vista previa de la fotografía personal" />
+                  <div>
+                    <strong>{{ photoFile()?.name }}</strong>
+                    <span>{{ photoSizeLabel() }}</span>
+                    <button type="button" (click)="clearPhoto()">Cambiar fotografía</button>
+                  </div>
+                </div>
+              }
+
+              <input
+                #photoInput
+                class="photo-input"
+                id="photo"
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="user"
+                [attr.aria-invalid]="photoError() ? 'true' : 'false'"
+                [attr.aria-describedby]="photoError() ? 'photoError' : null"
+                (change)="onPhotoSelected($event)"
+              />
+
+              @if (photoError()) {
+                <p class="photo-error" id="photoError" role="alert">{{ photoError() }}</p>
+              }
+            </div>
+
+            <label class="consent">
+              <input type="checkbox" formControlName="consent" />
+              <span>
+                Confirmo que verifiqué los datos y que la persona autorizó su uso y el de su
+                fotografía exclusivamente para esta Asamblea.
+              </span>
+            </label>
+
+            @if (registrationError()) {
+              <p class="form-error" role="alert">{{ registrationError() }}</p>
+            }
+
+            <button class="submit" type="submit" [disabled]="submitting() || !canRegister()">
+              <span>{{ submitting() ? 'Generando acreditación…' : 'Guardar y generar QR' }}</span>
+              <span aria-hidden="true">↗</span>
+            </button>
+            <p class="privacy">
+              El registro quedará asociado a {{ currentAdmin.name }} ·
+              {{ currentAdmin.department }}.
+            </p>
+          </form>
+        </section>
+      } @else {
+        @let currentTicket = ticket()!;
+        <article class="ticket admin-ticket" id="admin-accreditation" aria-live="polite">
+          <div class="success"><span>✓</span> Registro completado</div>
+          <p class="ticket-event">Asamblea Nacional · 22 AGO 2026</p>
+          <h3>Acreditación generada.</h3>
+          <p class="ticket-name">{{ currentTicket.fullName }}</p>
+          <div class="qr-frame">
+            <img
+              [src]="currentTicket.qr"
+              [alt]="'Código QR de acreditación ' + currentTicket.code"
+            />
+          </div>
+          <small>Código de registro</small>
+          <strong class="ticket-code">{{ currentTicket.code }}</strong>
+          <p class="ticket-help">
+            Descarga el QR y entrégalo a la persona registrada. Es personal y solo se valida una
+            vez.
+          </p>
+          <div class="ticket-actions">
+            <a
+              [href]="currentTicket.qr"
+              [attr.download]="'acreditacion-' + currentTicket.code + '.png'"
+            >
+              Descargar QR ↓
+            </a>
+            <button type="button" (click)="printTicket()">Imprimir</button>
+          </div>
+          @if (canRegister()) {
+            <button class="new-registration" type="button" (click)="resetRegistration()">
+              Registrar otra persona
+            </button>
+          } @else {
+            <p class="ticket-quota-complete">Este registro completó tu cupo asignado.</p>
+          }
+        </article>
+      }
+    </section>
+  }
+</main>

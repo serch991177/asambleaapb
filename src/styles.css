@@ -212,20 +212,27 @@ nav {
   text-transform: uppercase;
 }
 .poster-date {
+  width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
 }
+
 .poster-date strong {
-  font: 400 clamp(140px, 15vw, 220px)/0.72 var(--serif);
-  letter-spacing: -0.1em;
+  font: 400 clamp(90px, 10vw, 145px) / 0.85 var(--serif);
+  letter-spacing: -0.06em;
 }
+
 .poster-date span {
-  margin-top: 7px;
+  margin: 0;
   color: var(--coral);
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 800;
-  line-height: 0.9;
+  letter-spacing: 0.18em;
+  line-height: 1;
 }
 .poster-title {
   position: relative;

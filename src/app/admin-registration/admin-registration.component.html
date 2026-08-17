@@ -249,37 +249,80 @@
               </div>
 
               @if (!photoPreview()) {
-                <label class="photo-picker" for="photo">
-                  <span class="photo-picker-icon" aria-hidden="true">＋</span>
-                  <strong>Tomar o seleccionar fotografía</strong>
-                  <span>En celular puedes utilizar la cámara.</span>
-                </label>
+  <div class="photo-picker">
+    <span class="photo-picker-icon" aria-hidden="true">＋</span>
+
+    <strong>Agregar fotografía personal</strong>
+
+    <span>
+      Puedes tomar una fotografía o seleccionar una imagen guardada.
+    </span>
+
+    <div class="photo-source-actions">
+      <!-- En celulares abre directamente la cámara trasera -->
+      <label
+        class="photo-source-button camera-action"
+        for="photoCamera"
+      >
+        <span aria-hidden="true">📷</span>
+        Tomar fotografía
+      </label>
+
+      <!-- Abre el explorador o galería -->
+      <label
+        class="photo-source-button gallery-action"
+        for="photoGallery"
+      >
+        <span aria-hidden="true">🖼</span>
+        Elegir de la galería
+      </label>
+    </div>
+  </div>
               } @else {
                 <div class="photo-preview">
-                  <img [src]="photoPreview()" alt="Vista previa de la fotografía personal" />
+                  <img
+                    [src]="photoPreview()"
+                    alt="Vista previa de la fotografía personal"
+                  />
+
                   <div>
                     <strong>{{ photoFile()?.name }}</strong>
                     <span>{{ photoSizeLabel() }}</span>
-                    <button type="button" (click)="clearPhoto()">Cambiar fotografía</button>
+
+                    <button type="button" (click)="clearPhoto()">
+                      Cambiar fotografía
+                    </button>
                   </div>
                 </div>
               }
 
+              <!-- Cámara: capture solo debe estar en este input -->
               <input
-                #photoInput
+                #cameraInput
                 class="photo-input"
-                id="photo"
-                name="photo"
+                id="photoCamera"
+                name="photoCamera"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                capture="user"
-                [attr.aria-invalid]="photoError() ? 'true' : 'false'"
-                [attr.aria-describedby]="photoError() ? 'photoError' : null"
+                capture="environment"
+                (change)="onPhotoSelected($event)"
+              />
+
+              <!-- Galería: no colocar capture -->
+              <input
+                #galleryInput
+                class="photo-input"
+                id="photoGallery"
+                name="photoGallery"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
                 (change)="onPhotoSelected($event)"
               />
 
               @if (photoError()) {
-                <p class="photo-error" id="photoError" role="alert">{{ photoError() }}</p>
+                <p class="photo-error" id="photoError" role="alert">
+                  {{ photoError() }}
+                </p>
               }
             </div>
 

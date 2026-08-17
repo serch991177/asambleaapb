@@ -53,8 +53,8 @@ type Ticket = {
   styleUrl: './admin-registration.component.css',
 })
 export class AdminRegistrationComponent {
-  @ViewChild('photoInput') private photoInput?: ElementRef<HTMLInputElement>;
-
+  @ViewChild('cameraInput') private cameraInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('galleryInput') private galleryInput?: ElementRef<HTMLInputElement>;
   private static readonly sessionTokenKey = 'apb-admin-access-token';
   private static readonly allowedPhotoTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
   private static readonly maxPhotoBytes = 5 * 1024 * 1024;
@@ -288,8 +288,12 @@ export class AdminRegistrationComponent {
     this.photoPreview.set('');
     this.photoError.set('');
 
-    if (this.photoInput) {
-      this.photoInput.nativeElement.value = '';
+    if (this.cameraInput) {
+      this.cameraInput.nativeElement.value = '';
+    }
+
+    if (this.galleryInput) {
+      this.galleryInput.nativeElement.value = '';
     }
   }
 

@@ -612,3 +612,59 @@
     box-shadow: none;
   }
 }
+
+
+.photo-picker {
+  cursor: default;
+}
+
+.photo-source-actions {
+  width: 100%;
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.photo-source-button {
+  min-height: 48px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--brand);
+  background: white;
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.18s;
+}
+
+.photo-source-button:hover,
+.photo-source-button:focus-visible {
+  background: var(--brand);
+  color: white;
+}
+
+/* En computadora solo se muestra el explorador */
+.camera-action {
+  display: none;
+}
+
+/* En celular se muestran cámara y galería */
+@media (hover: none) and (pointer: coarse) {
+  .camera-action {
+    display: inline-flex;
+  }
+
+  .photo-source-actions {
+    flex-direction: column;
+  }
+
+  .photo-source-button {
+    width: 100%;
+  }
+}
